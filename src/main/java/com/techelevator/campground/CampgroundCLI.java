@@ -58,18 +58,26 @@ public class CampgroundCLI {
 		Campground[] allCampgroundsFromPark = campgroundDAO.getCampgroundPerPark(chosenPark);
 		Campground chosenCampground = (Campground) menu.getChoiceFromOptions(allCampgroundsFromPark);
 		
+		handleCampgroundAfterSelection(chosenPark); //THIS IS KEY< BUT WHY??!?!?!?!?!?!?!?!?!?!
 	}
-	
-	private void handleSearchForReservation(Campground chosenCampground) {
-		
+
+	private void handleCampgroundAfterSelection(Park chosenPark) {
+		//System.out.println("Select a Command");
+		String choice = (String) menu.getChoiceFromOptions(SELECTED_CAMPGROUND_MENU_OPTIONS);
+		if (choice.equals(CAMP_MENU_SEARCH_FOR_RESERVATION)) {
+			// handleSearchForReservation();
+		} else if (choice.equals(CAMP_MENU_RETURN_TO_PREVIOUS_SCREEN)) {
+			// handleRetrunToPreviousScreen();
+		}
 	}
 
 	private void handleCampgroundCommands(Park chosenPark) {
+		//System.out.println("Select a Command");
 		String choice = (String) menu.getChoiceFromOptions(CAMPGROUND_MENU_OPTIONS);
 		if (choice.equals(CAMP_MENU_VIEW_CAMPGROUND)) {
 			handleViewActiveCampgrounds(chosenPark);
 		} else if (choice.equals(CAMP_MENU_SEARCH_FOR_RESERVATION)) {
-			//handleSearchForReservation(chosenCampground);
+			// handleCampgroundCommandsList();
 		} else if (choice.equals(CAMP_MENU_RETURN_TO_PREVIOUS_SCREEN)) {
 			// handleRetrunToPreviousScreen();
 		}
