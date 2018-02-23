@@ -29,6 +29,7 @@ public class JDBCParkDAO implements ParkDAO {
 			Park thePark = mapRowToPark(results);
 			allParks.add(thePark);
 		}
+		//allParks.add("Q");
 		return allParks.toArray(new Park[allParks.size()]);
 	}
 	

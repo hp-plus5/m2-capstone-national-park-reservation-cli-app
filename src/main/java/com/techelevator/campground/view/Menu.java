@@ -31,7 +31,7 @@ public class Menu {
 		Object choice = null;
 		String userInput = in.nextLine();
 		if(userInput.equals("Q") || userInput.equals("q")) {
-			System.exit(1);
+			System.exit(0);
 		}
 		try {
 			int selectedOption = Integer.valueOf(userInput);
@@ -47,6 +47,10 @@ public class Menu {
 		}
 		return choice;
 	}
+	
+//	private Object getChoiceFromUserInput(Object[] options) {
+//		return getChoiceFromUserInput(options, "");
+//	}
 
 	private void displayMenuOptions(Object[] options) {
 		out.println();
@@ -54,7 +58,7 @@ public class Menu {
 			int optionNum = i + 1;
 			out.println(optionNum + ") " + options[i]);
 		}
-		out.println("Q) Quit");
+		//out.println("Q) Quit");
 		out.print("\nPlease choose an option >>> ");
 		out.flush();
 	}
