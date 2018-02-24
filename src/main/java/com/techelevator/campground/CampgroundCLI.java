@@ -1,6 +1,8 @@
 package com.techelevator.campground;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import javax.sql.DataSource;
 
@@ -8,10 +10,15 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 import com.techelevator.campground.model.Campground;
 import com.techelevator.campground.model.CampgroundDAO;
+import com.techelevator.campground.model.Campsite;
+import com.techelevator.campground.model.CampsiteDAO;
 import com.techelevator.campground.model.Park;
 import com.techelevator.campground.model.ParkDAO;
+import com.techelevator.campground.model.ReservationDAO;
 import com.techelevator.campground.model.JDBC.JDBCCampgroundDAO;
+import com.techelevator.campground.model.JDBC.JDBCCampsiteDAO;
 import com.techelevator.campground.model.JDBC.JDBCParkDAO;
+import com.techelevator.campground.model.JDBC.JDBCReservationDAO;
 import com.techelevator.campground.view.Menu;
 
 public class CampgroundCLI {
@@ -28,6 +35,8 @@ public class CampgroundCLI {
 	private Menu menu;
 	private ParkDAO parkDAO;
 	private CampgroundDAO campgroundDAO;
+	private CampsiteDAO campsiteDAO;
+	private ReservationDAO reservationDAO;
 
 	public static void main(String[] args) {
 		BasicDataSource dataSource = new BasicDataSource();
@@ -44,57 +53,128 @@ public class CampgroundCLI {
 		parkDAO = new JDBCParkDAO(datasource);
 
 		campgroundDAO = new JDBCCampgroundDAO(datasource);
+
+		campsiteDAO = new JDBCCampsiteDAO(datasource);
+		
+		reservationDAO = new JDBCReservationDAO(datasource);
 	}
 
 	public void run() {
-		Park[] allParks = parkDAO.getAllParks();
+		while (true) {
+			Park[] allParks = parkDAO.getAllParks();
 
-		Park chosenPark = (Park) menu.getChoiceFromOptions(allParks);
+			Park chosenPark = (Park) menu.getChoiceFromOptions(allParks);
 
-		menu.printPark(chosenPark);
+			menu.printPark(chosenPark);
+			// TODO: Figure out formatting for description
 
-		handleCampgroundCommands(chosenPark);
+			handleParkMenu(chosenPark);
+			
+			
 
-		Campground[] allCampgroundsFromPark = campgroundDAO.getCampgroundPerPark(chosenPark);
-		Campground chosenCampground = (Campground) menu.getChoiceFromOptions(allCampgroundsFromPark);
-		
-		handleCampgroundAfterSelection(chosenPark); //THIS IS KEY< BUT WHY??!?!?!?!?!?!?!?!?!?!
-	}
-
-	private void handleCampgroundAfterSelection(Park chosenPark) {
-		//System.out.println("Select a Command");
-		String choice = (String) menu.getChoiceFromOptions(SELECTED_CAMPGROUND_MENU_OPTIONS);
-		if (choice.equals(CAMP_MENU_SEARCH_FOR_RESERVATION)) {
-			// handleSearchForReservation();
-		} else if (choice.equals(CAMP_MENU_RETURN_TO_PREVIOUS_SCREEN)) {
-			// handleRetrunToPreviousScreen();
 		}
+
 	}
 
-	private void handleCampgroundCommands(Park chosenPark) {
-		//System.out.println("Select a Command");
-		String choice = (String) menu.getChoiceFromOptions(CAMPGROUND_MENU_OPTIONS);
-		if (choice.equals(CAMP_MENU_VIEW_CAMPGROUND)) {
-			handleViewActiveCampgrounds(chosenPark);
-		} else if (choice.equals(CAMP_MENU_SEARCH_FOR_RESERVATION)) {
-			// handleCampgroundCommandsList();
-		} else if (choice.equals(CAMP_MENU_RETURN_TO_PREVIOUS_SCREEN)) {
-			// handleRetrunToPreviousScreen();
-		}
-	}
+	private void printAllCampgrounds(Park chosenPark) {
+		// Display's selected park
+		System.out.println("\nPark Campgrounds for: " + chosenPark);
 
-	private void handleViewActiveCampgrounds(Park chosenPark) {
-		System.out.println("\nPark Campgrounds\n" + chosenPark.getName());
+		// Makes a list of the campgrounds within the passed in park
 		Campground[] campgrounds = campgroundDAO.getCampgroundPerPark(chosenPark);
-		listCampgrounds(campgrounds);
-	}
 
-	private void listCampgrounds(Campground[] campgrounds) {
-		System.out.println();
+		// CHecks that there are campgrounds within the selected park
 		if ((campgrounds.length - 1) >= 0) {
+			// Prints campground heading
 			System.out.println("     Name                           Open          Close          Daily Fee");
+
+			// Prints out available campgrounds
+			menu.displayCampgroundMenuOptions(campgrounds);
+
 		} else {
+			// Prints that there are no results
 			System.out.println("\n*** No results ***");
 		}
+
 	}
+
+	private void handleParkMenu(Park chosenPark) {
+		// Displays Park Menu
+		String choice = (String) menu.getChoiceFromOptions(CAMPGROUND_MENU_OPTIONS);
+
+		// Handle user choice
+		if (choice.equals(CAMP_MENU_VIEW_CAMPGROUND)) {
+			// Displays all selected camp grounds from the chosen park
+			printAllCampgrounds(chosenPark);
+			handleCampgroundMenu(chosenPark);
+
+			// handleViewActiveCampgrounds(chosenPark);
+		}
+
+		// This is some bonus business
+
+		// else if (choice.equals(CAMP_MENU_SEARCH_FOR_RESERVATION)) {
+		// Campground[] allCampgroundsFromPark =
+		// campgroundDAO.getCampgroundPerPark(chosenPark);
+		// //menu.displayCampgroundMenuOptions(allCampgroundsFromPark);
+		// listCampgroundSkeleton(allCampgroundsFromPark);
+		// }
+
+		else if (choice.equals(CAMP_MENU_RETURN_TO_PREVIOUS_SCREEN)) {
+			return;
+		}
+	}
+
+	// Displays the Campground Menu and handles user choice
+	private void handleCampgroundMenu(Park chosenPark) {
+		// Displays the Campground Menu Options and returns user input as choice
+		String choice = (String) menu.getChoiceFromOptions(SELECTED_CAMPGROUND_MENU_OPTIONS);
+
+		// Handles selection of Search For Reservation
+		if (choice.equals(CAMP_MENU_SEARCH_FOR_RESERVATION)) {
+			handleReservationSearchMenu(chosenPark);
+
+		} else if (choice.equals(CAMP_MENU_RETURN_TO_PREVIOUS_SCREEN)) {
+			return;
+		}
+	}
+
+	private void handleReservationSearchMenu(Park chosenPark) {
+		// Displays a list of campgrounds within the chosen park
+		printAllCampgrounds(chosenPark);
+		// Gets a list of campgrounds for the chosen park
+		Campground[] allCampgroundsFromPark = campgroundDAO.getCampgroundPerPark(chosenPark);
+		// Returns the user selected object that is then cast into a campground
+		Campground selectedCampground = (Campground) menu.getChoiceFromCampgroundOptions(allCampgroundsFromPark);
+		// Ask for the arrival date
+		LocalDate arrivalDate = menu
+				.getDateFromUser("What is the arrival date? Please enter a date in this format YYYY-MM-DD: ");
+		// Ask for the departure date
+		LocalDate departureDate = menu
+				.getDateFromUser("What is the departure date? Please enter a date in this format YYYY-MM-DD: ");
+		// Get available reservations within the desired search dates and campsite id
+		Campsite[] selectedCampsites = campsiteDAO.getSelectedCampsites(chosenPark.getId(), arrivalDate, departureDate);
+		// Get the amount of days for the desired stay and save it to a big decimal
+		BigDecimal durationOfStay = new BigDecimal(ChronoUnit.DAYS.between(arrivalDate, departureDate));
+		// Calculate the price of the stay based on the duration of stay and the daily
+		// fee of the campground
+		BigDecimal calculatedPrice = durationOfStay.multiply(selectedCampground.getDailyFee());
+		// Prints all of the available sites for the desired date range along with the
+		// newly calculated price
+		menu.displayAvailibleReservations(selectedCampsites, calculatedPrice);
+		// Prompts the user for the desired campsite
+		Campsite chosenSite = (Campsite) menu.getChoiceFromCampsiteOptions(selectedCampsites);
+		// Prompts the user for the desired name to reserve under
+		String reservationName = menu.getReservationName();
+		//Get's the site ID of the chosen campsite
+		int siteId = chosenSite.getSiteNumber();
+		Long reservationId = reservationDAO.enterReservation(siteId, reservationName, arrivalDate, departureDate);
+		reservationConfirmation(reservationId);
+	}
+	
+	private void reservationConfirmation(Long reservationId) {
+		System.out.println("Thank you! The resrvation has been made and the reservation ID is: " + reservationId);
+		System.exit(0);
+	}
+
 }
