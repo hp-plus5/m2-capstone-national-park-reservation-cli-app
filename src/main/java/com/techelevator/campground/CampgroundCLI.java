@@ -55,7 +55,7 @@ public class CampgroundCLI {
 		campgroundDAO = new JDBCCampgroundDAO(datasource);
 
 		campsiteDAO = new JDBCCampsiteDAO(datasource);
-		
+
 		reservationDAO = new JDBCReservationDAO(datasource);
 	}
 
@@ -66,11 +66,8 @@ public class CampgroundCLI {
 			Park chosenPark = (Park) menu.getChoiceFromOptions(allParks);
 
 			menu.printPark(chosenPark);
-			// TODO: Figure out formatting for description
 
 			handleParkMenu(chosenPark);
-			
-			
 
 		}
 
@@ -140,38 +137,58 @@ public class CampgroundCLI {
 	}
 
 	private void handleReservationSearchMenu(Park chosenPark) {
-		// Displays a list of campgrounds within the chosen park
-		printAllCampgrounds(chosenPark);
-		// Gets a list of campgrounds for the chosen park
-		Campground[] allCampgroundsFromPark = campgroundDAO.getCampgroundPerPark(chosenPark);
-		// Returns the user selected object that is then cast into a campground
-		Campground selectedCampground = (Campground) menu.getChoiceFromCampgroundOptions(allCampgroundsFromPark);
-		// Ask for the arrival date
-		LocalDate arrivalDate = menu
-				.getDateFromUser("What is the arrival date? Please enter a date in this format YYYY-MM-DD: ");
-		// Ask for the departure date
-		LocalDate departureDate = menu
-				.getDateFromUser("What is the departure date? Please enter a date in this format YYYY-MM-DD: ");
-		// Get available reservations within the desired search dates and campsite id
-		Campsite[] selectedCampsites = campsiteDAO.getSelectedCampsites(chosenPark.getId(), arrivalDate, departureDate);
-		// Get the amount of days for the desired stay and save it to a big decimal
-		BigDecimal durationOfStay = new BigDecimal(ChronoUnit.DAYS.between(arrivalDate, departureDate));
-		// Calculate the price of the stay based on the duration of stay and the daily
-		// fee of the campground
-		BigDecimal calculatedPrice = durationOfStay.multiply(selectedCampground.getDailyFee());
-		// Prints all of the available sites for the desired date range along with the
-		// newly calculated price
-		menu.displayAvailibleReservations(selectedCampsites, calculatedPrice);
-		// Prompts the user for the desired campsite
-		Campsite chosenSite = (Campsite) menu.getChoiceFromCampsiteOptions(selectedCampsites);
-		// Prompts the user for the desired name to reserve under
-		String reservationName = menu.getReservationName();
-		//Get's the site ID of the chosen campsite
-		int siteId = chosenSite.getSiteNumber();
-		Long reservationId = reservationDAO.enterReservation(siteId, reservationName, arrivalDate, departureDate);
-		reservationConfirmation(reservationId);
+		Object userChoice = null;
+		while (userChoice == null) {
+			// Displays a list of campgrounds within the chosen park
+			printAllCampgrounds(chosenPark);
+			// Gets a list of campgrounds for the chosen park
+			Campground[] allCampgroundsFromPark = campgroundDAO.getCampgroundPerPark(chosenPark);
+			// Returns the user selected object that is then cast into a campground
+			userChoice = menu.getChoiceFromCampgroundOptions(allCampgroundsFromPark);
+			if(userChoice.equals("Exit")) {
+				return;
+			} else {
+				Campground selectedCampground = (Campground) menu.getChoiceFromCampgroundOptions(allCampgroundsFromPark);
+				// Ask for the arrival date
+				LocalDate arrivalDate = menu
+						.getDateFromUser("What is the arrival date? Please enter a date in this format YYYY-MM-DD: ");
+				// Ask for the departure date
+				LocalDate departureDate = menu
+						.getDateFromUser("What is the departure date? Please enter a date in this format YYYY-MM-DD: ");
+				// Get available reservations within the desired search dates and campsite id
+				Campsite[] selectedCampsites = campsiteDAO.getSelectedCampsites(chosenPark.getId(), arrivalDate,
+						departureDate);
+				// Get the amount of days for the desired stay and save it to a big decimal
+				BigDecimal durationOfStay = new BigDecimal(ChronoUnit.DAYS.between(arrivalDate, departureDate));
+				// Calculate the price of the stay based on the duration of stay and the daily
+				// fee of the campground
+				BigDecimal calculatedPrice = durationOfStay.multiply(selectedCampground.getDailyFee());
+				// Prints all of the available sites for the desired date range along with the
+				// newly calculated price
+
+				menu.displayAvailableReservations(selectedCampsites, calculatedPrice);
+				// Prompts the user for the desired campsite
+				userChoice = menu.getChoiceFromCampsiteOptions(selectedCampsites);
+				if (userChoice.equals("Exit")) {
+					userChoice = null;
+				} else {
+					Campsite chosenSite = (Campsite) userChoice;
+					// Prompts the user for the desired name to reserve under
+					String reservationName = menu.getReservationName();
+					// Get's the site ID of the chosen campsite
+					int siteId = chosenSite.getSiteNumber();
+					Long reservationId = reservationDAO.enterReservation(siteId, reservationName, arrivalDate,
+							departureDate);
+					reservationConfirmation(reservationId);
+					return;
+				}
+			}
+			
+
+		}
+
 	}
-	
+
 	private void reservationConfirmation(Long reservationId) {
 		System.out.println("Thank you! The resrvation has been made and the reservation ID is: " + reservationId);
 		System.exit(0);

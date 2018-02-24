@@ -26,7 +26,8 @@ public class JDBCCampsiteDAO implements CampsiteDAO {
 		String sqlReserveableCampsites = "SELECT site.site_number, site.max_occupancy, site.accessible, site.max_rv_length, site.utilities "
 				+ "FROM site " + "WHERE campground_id = ? AND site_id NOT IN ("
 				+ "SELECT site_id FROM reservation WHERE (? <= reservation.to_date AND ? >= reservation.from_date)"
-				+ ") " + "LIMIT 5";
+				+ ") " 
+				+ "LIMIT 5";
 		/*
 		 * This is some magic
 		 */

@@ -37,12 +37,23 @@ public class Menu {
 		Object choice = null;
 		String userInput = in.nextLine();
 		if (userInput.equals("Q") || userInput.equals("q") && mainMenu) {
+			out.print("Thanks for using our application! Bye bye!");
+			out.flush();
 			System.exit(0);
+		}
+		if (userInput.equals("0")) {
+			mainMenu = true;
+			return choice = "Exit";
 		}
 		try {
 			int selectedOption = Integer.valueOf(userInput);
 			if (selectedOption <= options.length) {
 				choice = options[selectedOption - 1];
+				if(!choice.equals("Return to Previous Screen")) {
+					mainMenu = false;
+				} else {
+					mainMenu = true;
+				}
 			}
 		} catch (NumberFormatException e) {
 			// eat the exception, an error message will be displayed below since choice will
@@ -51,7 +62,6 @@ public class Menu {
 		if (choice == null) {
 			out.println("\n*** " + userInput + " is not a valid option ***\n");
 		}
-		mainMenu = false;
 		return choice;
 	}
 
@@ -74,7 +84,6 @@ public class Menu {
 		Object choice = null;
 		while (choice == null) {
 			out.print("Which campground (enter 0 to cancel)? ");
-			// TODO: don't handle when 0 is entered
 			out.flush();
 			choice = getChoiceFromUserInput(options);
 		}
@@ -99,9 +108,32 @@ public class Menu {
 		out.printf(
 				"\n%s National Park \nLocation: %s \nEstablished: %s \nArea: %,d square kilometers \nAnnual Visitors: %,d \n\n%s\n",
 				chosenPark.getName(), chosenPark.getLocation(), chosenPark.getEstablishDate(), chosenPark.getArea(),
-				chosenPark.getVisitors(), chosenPark.getDescription());
+				chosenPark.getVisitors(), wrap(chosenPark.getDescription()));
 		out.flush();
 	}
+	
+	public String wrap(String longString) {
+		String[] splittedString = longString.split(" ");
+		String resultString = "";
+		String lineString = "";
+
+		    for (int i = 0; i < splittedString.length; i++) {
+		        if (lineString.isEmpty()) {
+		            lineString += splittedString[i] + " ";
+		        } else if (lineString.length() + splittedString[i].length() < 100) {
+		            lineString += splittedString[i] + " ";
+		        } else {
+		            resultString += lineString + "\n";
+		            lineString = "";
+		        }
+		    }
+
+		    if(!lineString.isEmpty()){
+		            resultString += lineString + "\n";
+		    }
+
+		    return resultString;
+		}
 
 	public LocalDate getDateFromUser(String prompt) {
 		while (true) {
@@ -121,14 +153,13 @@ public class Menu {
 		}
 	}
 
-	public void displayAvailibleReservations(Campsite[] availibleSites, BigDecimal calculatedPrice) {
-		// TODO: move logic to somewhere else
-		if (availibleSites.length == 0) {
+	public void displayAvailableReservations(Campsite[] availableSites, BigDecimal calculatedPrice) {
+		if (availableSites.length == 0) {
 			out.println("\nWe're sorry, there are no availible campsites for the specified date range");
 			out.flush();
 		} else {
-			out.println("\nSite ID   Maximum Occupancy  Accesible?  Maximum RV Length  Utility  Daily Fee");
-			for (Campsite site : availibleSites) {
+			out.println("\nSite ID   Maximum Occupancy  Accessible?  Maximum RV Length  Utility  Daily Fee");
+			for (Campsite site : availableSites) {
 				out.println(site + " $" + calculatedPrice);
 			}
 			out.flush();
@@ -146,10 +177,9 @@ public class Menu {
 	}
 
 	public String getReservationName() {
-		out.print("What name should the reservation be made under? ");
+		out.print("What name should the reservation be made under? Please enter your full name. ");
 		out.flush();
 		String name = in.nextLine();
-		// TODO: do we care how the user enters their name?
 		return name;
 	}
 
