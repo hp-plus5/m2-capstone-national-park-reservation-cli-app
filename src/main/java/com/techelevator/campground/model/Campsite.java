@@ -2,11 +2,29 @@ package com.techelevator.campground.model;
 
 public class Campsite {
 
+	private Long siteId;
+	private Long campgroundId;
 	private int siteNumber;
 	private int maxOccupancy;
 	private boolean accessible;
 	private int maxRVLength;
 	private boolean utilities;
+	
+	public Long getSiteId() {
+		return siteId;
+	}
+
+	public void setSiteId(Long siteId) {
+		this.siteId = siteId;
+	}
+
+	public Long getCampgroundId() {
+		return campgroundId;
+	}
+
+	public void setCampgroundId(Long campgroundId) {
+		this.campgroundId = campgroundId;
+	}
 
 	public int getSiteNumber() {
 		return siteNumber;
@@ -71,7 +89,7 @@ public class Campsite {
 			utilitiesAsString = "N/A";
 		}
 		// Returns the Campsite as a nice string
-		return String.format("%-10s%-19s%-12s%-19s%-8s", siteNumber, maxOccupancy, accessibleAsString,
+		return String.format("%-10s%-19s%-13s%-19s%-8s", siteNumber, maxOccupancy, accessibleAsString,
 				maxRVLengthAsString, utilitiesAsString);
 	}
 }

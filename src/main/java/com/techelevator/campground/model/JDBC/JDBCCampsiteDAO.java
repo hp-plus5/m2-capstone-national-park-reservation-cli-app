@@ -23,7 +23,7 @@ public class JDBCCampsiteDAO implements CampsiteDAO {
 	public Campsite[] getSelectedCampsites(Long campgroundId, LocalDate arrivalDate, LocalDate departureDate) {
 		List<Campsite> reserveableCampsites = new ArrayList<>();
 
-		String sqlReserveableCampsites = "SELECT site.site_number, site.max_occupancy, site.accessible, site.max_rv_length, site.utilities "
+		String sqlReserveableCampsites = "SELECT * "
 				+ "FROM site " + "WHERE campground_id = ? AND site_id NOT IN ("
 				+ "SELECT site_id FROM reservation WHERE (? <= reservation.to_date AND ? >= reservation.from_date)"
 				+ ") " 
@@ -43,6 +43,8 @@ public class JDBCCampsiteDAO implements CampsiteDAO {
 
 	private Campsite mapRowToCampsite(SqlRowSet results) {
 		Campsite theCampsite = new Campsite();
+		theCampsite.setSiteId(results.getLong("site_id"));
+		theCampsite.setCampgroundId(results.getLong("campground_id"));
 		theCampsite.setSiteNumber(results.getInt("site_number"));
 		theCampsite.setMaxOccupancy(results.getInt("max_occupancy"));
 		theCampsite.setAccessible(results.getBoolean("accessible"));

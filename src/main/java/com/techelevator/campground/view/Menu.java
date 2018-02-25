@@ -113,15 +113,15 @@ public class Menu {
 	}
 	
 	public String wrap(String longString) {
-		String[] splittedString = longString.split(" ");
+		String[] splitString = longString.split(" ");
 		String resultString = "";
 		String lineString = "";
 
-		    for (int i = 0; i < splittedString.length; i++) {
+		    for (int i = 0; i < splitString.length; i++) {
 		        if (lineString.isEmpty()) {
-		            lineString += splittedString[i] + " ";
-		        } else if (lineString.length() + splittedString[i].length() < 100) {
-		            lineString += splittedString[i] + " ";
+		            lineString += splitString[i] + " ";
+		        } else if (lineString.length() + splitString[i].length() < 100) {
+		            lineString += splitString[i] + " ";
 		        } else {
 		            resultString += lineString + "\n";
 		            lineString = "";
@@ -166,12 +166,45 @@ public class Menu {
 		}
 	}
 
-	public Object getChoiceFromCampsiteOptions(Object[] options) {
+	public Object getChoiceFromCampsiteOptions(Campsite[] options) {
 		Object choice = null;
 		while (choice == null) {
 			out.print("Which site should be reserved (enter 0 to cancel)? ");
 			out.flush();
-			choice = getChoiceFromUserInput(options);
+			choice = getChoiceFromAvailibleCampsites(options);
+		}
+		return choice;
+	}
+	
+	public Object getChoiceFromAvailibleCampsites(Campsite[] options) {
+		Object choice = null;
+		// Creates an array with 5 indexes
+		Long[] arrayOfSiteNumbers = new Long[5];
+		int i = 0;
+		// Goes through the array of campsites and get's the site ID
+		for (i = 0; i < 5; i++) {
+			arrayOfSiteNumbers[i] = options[i].getSiteId();
+		}
+		// Gets the input from the user
+		String userInput = in.nextLine();
+		
+		try {
+			// Tries to convert the user input into a long
+			Long selectedOption = Long.valueOf(userInput);
+			int counter = 0;
+			for(Long siteId : arrayOfSiteNumbers) {
+				if (selectedOption == siteId) {
+					return choice = options[counter];
+				}
+				counter ++;
+			}
+			choice = 0;
+		} catch (NumberFormatException e) {
+			// eat the exception, an error message will be displayed below since choice will
+			// be null
+		}
+		if (choice == null) {
+			out.println("\n*** " + userInput + " is not a valid option ***\n");
 		}
 		return choice;
 	}

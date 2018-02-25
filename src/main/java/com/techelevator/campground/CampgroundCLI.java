@@ -104,8 +104,6 @@ public class CampgroundCLI {
 			// Displays all selected camp grounds from the chosen park
 			printAllCampgrounds(chosenPark);
 			handleCampgroundMenu(chosenPark);
-
-			// handleViewActiveCampgrounds(chosenPark);
 		}
 
 		// This is some bonus business
@@ -148,7 +146,7 @@ public class CampgroundCLI {
 			if(userChoice.equals("Exit")) {
 				return;
 			} else {
-				Campground selectedCampground = (Campground) menu.getChoiceFromCampgroundOptions(allCampgroundsFromPark);
+				Campground selectedCampground = (Campground) userChoice;
 				// Ask for the arrival date
 				LocalDate arrivalDate = menu
 						.getDateFromUser("What is the arrival date? Please enter a date in this format YYYY-MM-DD: ");
@@ -169,7 +167,7 @@ public class CampgroundCLI {
 				menu.displayAvailableReservations(selectedCampsites, calculatedPrice);
 				// Prompts the user for the desired campsite
 				userChoice = menu.getChoiceFromCampsiteOptions(selectedCampsites);
-				if (userChoice.equals("Exit")) {
+				if (userChoice.equals(0)) {
 					userChoice = null;
 				} else {
 					Campsite chosenSite = (Campsite) userChoice;
