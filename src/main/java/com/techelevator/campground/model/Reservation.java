@@ -46,6 +46,4 @@ public class Reservation {
 	public void setCreateDate(LocalDate createDate) {
 		this.createDate = createDate;
 	}
-	
-	
 }

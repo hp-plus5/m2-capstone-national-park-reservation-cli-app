@@ -3,7 +3,9 @@ package com.techelevator.campground.model.JDBC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Date;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -12,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.techelevator.campground.model.Campsite;
 
@@ -20,8 +23,10 @@ public class JDCBCampsiteDAOTest {
 	private JDBCCampsiteDAO sut;
 	private LocalDate arrivalDate = LocalDate.parse("2040-01-01");
 	private LocalDate departureDate = LocalDate.parse("2040-01-02");
-	private Long createdSiteId;
+	private Long siteId;
 	private Long reservationId;
+	private Long parkId;
+	private Long campgroundId;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -46,15 +51,27 @@ public class JDCBCampsiteDAOTest {
 		sut = new JDBCCampsiteDAO(dataSource);
 
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		
+// park creation
+	// park: dates
+		String sEstablishDate = "2001/04/01";
+		Date EstablishDate = new SimpleDateFormat("YYYY/MM/dd").parse(sEstablishDate);
+	// park: creation
+		String sqlNewPark = "INSERT INTO park (name, location, establish_date, area, visitors, description) VALUES (?, ?, ?, ?, ?, ?) RETURNING park_id";
+		parkId = jdbcTemplate.queryForObject(sqlNewPark, Long.class, "Name Test", "Location Test", EstablishDate, 10000,
+				2000, "Description of Park");
+// camp ground creation
+		String sqlNewCampground = "INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) VALUES (?, ?, ?, ?, ?) RETURNING campground_id";
+		campgroundId = jdbcTemplate.queryForObject(sqlNewCampground, Long.class, parkId, "Name Campground", 01, 12, 10);
+// camp site creation
 		String sqlnewSite = "INSERT INTO site(campground_id, site_number, max_occupancy, accessible, max_rv_length, utilities) "
 				+ "VALUES(?, ?, ?, ?, ?, ?) RETURNING site_id";
-		createdSiteId = jdbcTemplate.queryForObject(sqlnewSite, Long.class, 1, 666, 0, false, 0, false);
-
+		siteId = jdbcTemplate.queryForObject(sqlnewSite, Long.class, campgroundId, 637, 0, false, 0, false);
+// reservation creation
 		String sqlNewReservation = "INSERT INTO reservation(site_id, name, from_date, to_date, create_date) "
 				+ "VALUES(?, ?, ?, ?, ?) RETURNING reservation_id";
-		reservationId = jdbcTemplate.queryForObject(sqlNewReservation, Long.class, createdSiteId, "Balls", LocalDate.parse("2030-01-01"),
-				LocalDate.parse("2030-01-02"), LocalDate.parse("2030-01-01"));
-
+		reservationId = jdbcTemplate.queryForObject(sqlNewReservation, Long.class, siteId, "Balls",
+				LocalDate.parse("2030-01-01"), LocalDate.parse("2030-01-02"), LocalDate.parse("2030-01-01"));
 	}
 
 	@After
@@ -64,15 +81,15 @@ public class JDCBCampsiteDAOTest {
 
 	@Test
 	public void testGetSelectedCampsitesWithValidDate() {
-		System.out.println(createdSiteId);
+		System.out.println(siteId);
 		System.out.println(reservationId);
-		System.out.println(sut.getSelectedCampsites(createdSiteId, arrivalDate, departureDate));
-		Campsite[] selectedSites = sut.getSelectedCampsites(createdSiteId, arrivalDate, departureDate);
+		System.out.println(sut.getSelectedCampsites(campgroundId, arrivalDate, departureDate));
+		Campsite[] selectedSites = sut.getSelectedCampsites(campgroundId, arrivalDate, departureDate);
 
 		for (Campsite camp : selectedSites) {
-			if (camp.getSiteNumber() == 666) {
-				assertEquals(createdSiteId, camp.getSiteId());
-				assertEquals(666, camp.getSiteNumber());
+			if (camp.getSiteNumber() == 637) {
+				assertEquals(siteId, camp.getSiteId());
+				assertEquals(637, camp.getSiteNumber());
 				return;
 			}
 		}

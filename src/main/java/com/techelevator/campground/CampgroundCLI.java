@@ -68,9 +68,7 @@ public class CampgroundCLI {
 			menu.printPark(chosenPark);
 
 			handleParkMenu(chosenPark);
-
 		}
-
 	}
 
 	private void printAllCampgrounds(Park chosenPark) {
@@ -92,7 +90,6 @@ public class CampgroundCLI {
 			// Prints that there are no results
 			System.out.println("\n*** No results ***");
 		}
-
 	}
 
 	private void handleParkMenu(Park chosenPark) {
@@ -143,7 +140,7 @@ public class CampgroundCLI {
 			Campground[] allCampgroundsFromPark = campgroundDAO.getCampgroundPerPark(chosenPark);
 			// Returns the user selected object that is then cast into a campground
 			userChoice = menu.getChoiceFromCampgroundOptions(allCampgroundsFromPark);
-			if(userChoice.equals("Exit")) {
+			if (userChoice.equals("Exit")) {
 				return;
 			} else {
 				Campground selectedCampground = (Campground) userChoice;
@@ -181,15 +178,11 @@ public class CampgroundCLI {
 					return;
 				}
 			}
-			
-
 		}
-
 	}
 
 	private void reservationConfirmation(Long reservationId) {
 		System.out.println("Thank you! The resrvation has been made and the reservation ID is: " + reservationId);
 		System.exit(0);
 	}
-
 }
